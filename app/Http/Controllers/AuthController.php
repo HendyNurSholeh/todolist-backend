@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @group Authentication
+ * 
+ * APIs for user authentication and account management
+ */
 class AuthController extends Controller
 {
     /**
@@ -21,7 +26,37 @@ class AuthController extends Controller
     }
 
     /**
-     * Register a new user
+     * User Registration
+     * 
+     * Register a new user account and receive an authentication token.
+     * 
+     * @bodyParam name string required The user's full name. Example: John Doe
+     * @bodyParam email string required The user's email address. Example: john@example.com
+     * @bodyParam password string required The user's password (minimum 6 characters). Example: password123
+     * @bodyParam password_confirmation string required Password confirmation. Example: password123
+     * 
+     * @response 201 scenario="success" {
+     *  "status": "success",
+     *  "message": "User successfully registered",
+     *  "user": {
+     *    "id": 1,
+     *    "name": "John Doe",
+     *    "email": "john@example.com",
+     *    "email_verified_at": null,
+     *    "created_at": "2025-01-15T10:30:00.000000Z",
+     *    "updated_at": "2025-01-15T10:30:00.000000Z"
+     *  },
+     *  "authorization": {
+     *    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+     *    "type": "bearer"
+     *  }
+     * }
+     * 
+     * @response 422 scenario="validation error" {
+     *  "errors": {
+     *    "email": ["The email has already been taken."]
+     *  }
+     * }
      */
     public function register(Request $request)
     {
@@ -55,7 +90,39 @@ class AuthController extends Controller
     }
 
     /**
-     * Get a JWT via given credentials.
+     * User Login
+     * 
+     * Authenticate user with email and password to get JWT token.
+     * 
+     * @bodyParam email string required The user's email address. Example: john@example.com
+     * @bodyParam password string required The user's password. Example: password123
+     * 
+     * @response 200 scenario="success" {
+     *  "status": "success",
+     *  "message": "Login successful",
+     *  "user": {
+     *    "id": 1,
+     *    "name": "John Doe",
+     *    "email": "john@example.com",
+     *    "email_verified_at": null,
+     *    "created_at": "2025-01-15T10:30:00.000000Z",
+     *    "updated_at": "2025-01-15T10:30:00.000000Z"
+     *  },
+     *  "authorization": {
+     *    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+     *    "type": "bearer"
+     *  }
+     * }
+     * 
+     * @response 401 scenario="invalid credentials" {
+     *  "error": "Invalid credentials"
+     * }
+     * 
+     * @response 422 scenario="validation error" {
+     *  "errors": {
+     *    "email": ["The email field is required."]
+     *  }
+     * }
      */
     public function login(Request $request)
     {
@@ -86,7 +153,27 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
+     * Get User Profile
+     * 
+     * Get the authenticated user's profile information.
+     * 
+     * @authenticated
+     * 
+     * @response 200 scenario="success" {
+     *  "status": "success",
+     *  "user": {
+     *    "id": 1,
+     *    "name": "John Doe",
+     *    "email": "john@example.com",
+     *    "email_verified_at": null,
+     *    "created_at": "2025-01-15T10:30:00.000000Z",
+     *    "updated_at": "2025-01-15T10:30:00.000000Z"
+     *  }
+     * }
+     * 
+     * @response 401 scenario="unauthenticated" {
+     *  "message": "Unauthenticated."
+     * }
      */
     public function me()
     {
@@ -97,7 +184,20 @@ class AuthController extends Controller
     }
 
     /**
-     * Log the user out (Invalidate the token).
+     * User Logout
+     * 
+     * Logout the authenticated user and invalidate the JWT token.
+     * 
+     * @authenticated
+     * 
+     * @response 200 scenario="success" {
+     *  "status": "success",
+     *  "message": "Successfully logged out"
+     * }
+     * 
+     * @response 401 scenario="unauthenticated" {
+     *  "message": "Unauthenticated."
+     * }
      */
     public function logout()
     {
@@ -110,7 +210,31 @@ class AuthController extends Controller
     }
 
     /**
-     * Refresh a token.
+     * Refresh JWT Token
+     * 
+     * Refresh the JWT token to extend session time.
+     * 
+     * @authenticated
+     * 
+     * @response 200 scenario="success" {
+     *  "status": "success",
+     *  "user": {
+     *    "id": 1,
+     *    "name": "John Doe",
+     *    "email": "john@example.com",
+     *    "email_verified_at": null,
+     *    "created_at": "2025-01-15T10:30:00.000000Z",
+     *    "updated_at": "2025-01-15T10:30:00.000000Z"
+     *  },
+     *  "authorization": {
+     *    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+     *    "type": "bearer"
+     *  }
+     * }
+     * 
+     * @response 401 scenario="unauthenticated" {
+     *  "message": "Unauthenticated."
+     * }
      */
     public function refresh()
     {
