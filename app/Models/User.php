@@ -66,4 +66,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    /**
+     * Get todos for this user
+     */
+    public function todos()
+    {
+        return $this->hasMany(Todo::class);
+    }
 }
